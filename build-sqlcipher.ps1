@@ -114,19 +114,27 @@ if (-not (Test-Path $SqlCipherSrc)) {
 ##############################################################################
 Write-Section 'Building SQLCipher'
 Push-Location $BinDir
-try { $TopRel = [IO.Path]::GetRelativePath($BinDir, $SqlCipherSrc) } catch { $TopRel = '..\sqlcipher' }
+
+try {
+    $TopRel = [System.IO.Path]::GetRelativePath($BinDir, $SqlCipherSrc)
+} catch {
+    $TopRel = '..\sqlcipher'
+}
+
 $env:INCLUDE = "$OpenSslSrc\out\include;$env:INCLUDE"
 $env:LIB     = "$OpenSslSrc\out\lib;$env:LIB"
 
-nmake /f $mf \
-      TOP=$TopRel \
-      USE_CRT_DLL=1 \
-      OPTS=' -DSQLITE_HAS_CODEC -DSQLITE_ENABLE_COLUMN_METADATA -DSQLITE_ENABLE_UNLOCK_NOTIFY ' \
-      LTLIBPATHS="/LIBPATH:`"$OpenSslSrc\out\lib`"" \
-      LTLIBS="libcrypto.lib libssl.lib" \
+nmake /f $mf `
+      TOP=$TopRel `
+      USE_CRT_DLL=1 `
+      OPTS=' -DSQLITE_HAS_CODEC -DSQLITE_ENABLE_COLUMN_METADATA -DSQLITE_ENABLE_UNLOCK_NOTIFY ' `
+      LTLIBPATHS="/LIBPATH:`"$OpenSslSrc\out\lib`"" `
+      LTLIBS="libcrypto.lib libssl.lib" `
       TLIBS="libcrypto.lib libssl.lib ws2_32.lib user32.lib advapi32.lib crypt32.lib kernel32.lib"
 
-if ($LASTEXITCODE) { throw "SQLCipher build failed (exit $LASTEXITCODE)" }
+if ($LASTEXITCODE) {
+    throw "SQLCipher build failed with exit code $LASTEXITCODE"
+}
 Pop-Location
 
 ##############################################################################
